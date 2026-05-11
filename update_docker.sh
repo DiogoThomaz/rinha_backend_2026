@@ -4,7 +4,7 @@ set -euo pipefail
 # Variáveis
 IMAGE_NAME="ghcr.io/diogothomaz/rinhabackend2026:latest"
 DOCKERFILE_PATH="api/Dockerfile"
-CONTEXT_PATH="api"
+CONTEXT_PATH="."
 
 # Função para exibir mensagens
 log() {

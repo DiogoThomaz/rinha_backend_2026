@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "dataset.h"
+#include <zlib.h>
 
 #define MAX_JSON_SIZE 65536
 #define MAX_MCC_ENTRIES 256
@@ -326,10 +327,60 @@ static int append_body(request_ctx_t *ctx, const char *chunk, size_t chunk_size)
     return 0;
 }
 
+static int supports_gzip(struct MHD_Connection *connection) {
+    const char *accept_encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
+    return accept_encoding && strstr(accept_encoding, "gzip");
+}
+
+static int gzip_compress(const char *input, size_t input_len, char **output, size_t *output_len) {
+    z_stream stream;
+    memset(&stream, 0, sizeof(stream));
+
+    if (deflateInit2(&stream, Z_BEST_COMPRESSION, Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY) != Z_OK) {
+        return -1;
+    }
+
+    size_t buf_size = compressBound(input_len);
+    *output = malloc(buf_size);
+    if (!*output) {
+        deflateEnd(&stream);
+        return -1;
+    }
+
+    stream.next_in = (Bytef *)input;
+    stream.avail_in = input_len;
+    stream.next_out = (Bytef *)*output;
+    stream.avail_out = buf_size;
+
+    if (deflate(&stream, Z_FINISH) != Z_STREAM_END) {
+        free(*output);
+        deflateEnd(&stream);
+        return -1;
+    }
+
+    *output_len = buf_size - stream.avail_out;
+    deflateEnd(&stream);
+    return 0;
+}
+
 static enum MHD_Result send_json(struct MHD_Connection *connection, unsigned int status, const char *body) {
-    struct MHD_Response *r = MHD_create_response_from_buffer(strlen(body), (void *)body, MHD_RESPMEM_MUST_COPY);
+    struct MHD_Response *r;
     enum MHD_Result ret;
-    if (!r) return MHD_NO;
+    char *compressed_body = NULL;
+    size_t compressed_len = 0;
+
+    if (supports_gzip(connection) && gzip_compress(body, strlen(body), &compressed_body, &compressed_len) == 0) {
+        r = MHD_create_response_from_buffer(compressed_len, (void *)compressed_body, MHD_RESPMEM_MUST_FREE);
+        if (!r) {
+            free(compressed_body);
+            return MHD_NO;
+        }
+        MHD_add_response_header(r, "Content-Encoding", "gzip");
+    } else {
+        r = MHD_create_response_from_buffer(strlen(body), (void *)body, MHD_RESPMEM_MUST_COPY);
+        if (!r) return MHD_NO;
+    }
+
     MHD_add_response_header(r, "Content-Type", "application/json");
     ret = MHD_queue_response(connection, status, r);
     MHD_destroy_response(r);

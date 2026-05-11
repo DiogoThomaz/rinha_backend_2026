@@ -1,6 +1,8 @@
 services:
   data-prep:
-    image: ghcr.io/diogothomaz/rinhabackend2026:latest
+    build:
+      context: .
+      dockerfile: api/Dockerfile
     entrypoint: ["/app/docker-prepare-data.sh"]
     environment:
       DATA_DIR: /data
@@ -16,7 +18,9 @@ services:
           memory: "32MB"
 
   api1:
-    image: ghcr.io/diogothomaz/rinhabackend2026:latest
+    build:
+      context: .
+      dockerfile: api/Dockerfile
     depends_on:
       data-prep:
         condition: service_completed_successfully
@@ -31,7 +35,9 @@ services:
           memory: "143MB"
 
   api2:
-    image: ghcr.io/diogothomaz/rinhabackend2026:latest
+    build:
+      context: .
+      dockerfile: api/Dockerfile
     depends_on:
       data-prep:
         condition: service_completed_successfully

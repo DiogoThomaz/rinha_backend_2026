@@ -1,7 +1,7 @@
 CC ?= gcc
 CFLAGS ?= -std=c11 -O3 -Wall -Wextra
 CPPFLAGS += $(shell pkg-config --cflags libmicrohttpd 2>/dev/null)
-LDLIBS += $(shell pkg-config --libs libmicrohttpd 2>/dev/null) -lm
+LDLIBS += $(shell pkg-config --libs libmicrohttpd 2>/dev/null) -lm -lz
 
 TARGET := fraud_api
 PREPROCESS_TARGET := preprocess_references

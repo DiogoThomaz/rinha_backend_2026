@@ -189,3 +189,17 @@ Observacoes importantes:
 2. Medir cedo para evitar otimizar no escuro.
 3. Manter caminho de evolucao para tecnicas mais avancadas de indexacao vetorial.
 4. Priorizar eficiencia de runtime em C para latencia baixa sob limite de recurso.
+
+## Benchmark local
+[benchmark] Resultado
+- requisições feitas: 10000
+- sucesso nas requisições:  10000
+- erros nas requisições:   0
+- avg:      1.10 ms
+- p95:      1.44 ms
+- p99:      2.24 ms
+- min:      0.81 ms
+- max:      8.86 ms
+- aprox rps: 109.08
+- uso de memória por instancia da API: ~5MB
+- observações: Latências consistentes e dentro do esperado para a implementação atual.
