@@ -57,10 +57,7 @@ fi
 if [[ "$BACKGROUND" == "1" ]]; then
   echo "[run] Subindo API em background"
   : > "$LOG_FILE"
-  (
-    cd "$API_DIR"
-    DATA_DIR="$DATA_DIR" ./fraud_api >"$LOG_FILE" 2>&1
-  ) &
+  DATA_DIR="$DATA_DIR" "$API_DIR/fraud_api" >"$LOG_FILE" 2>&1 &
   api_pid=$!
   echo "$api_pid" > "$PID_FILE"
 
@@ -81,6 +78,5 @@ if [[ "$BACKGROUND" == "1" ]]; then
   fi
 else
   echo "[run] Subindo API em foreground (Ctrl+C para encerrar)"
-  cd "$API_DIR"
-  exec DATA_DIR="$DATA_DIR" ./fraud_api
+  exec DATA_DIR="$DATA_DIR" "$API_DIR/fraud_api"
 fi

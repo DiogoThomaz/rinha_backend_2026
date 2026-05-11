@@ -31,18 +31,30 @@ fi
 
 mkdir -p "$DATA_DIR"
 
-cleanup() {
+stop_managed_api() {
   if [[ -f "$PID_FILE" ]]; then
     local pid
-    pid="$(cat "$PID_FILE")"
+    pid="$(cat "$PID_FILE" 2>/dev/null || true)"
     if [[ -n "$pid" ]] && kill -0 "$pid" >/dev/null 2>&1; then
       kill "$pid" >/dev/null 2>&1 || true
       wait "$pid" 2>/dev/null || true
     fi
+    rm -f "$PID_FILE"
   fi
 }
 
+cleanup() {
+  stop_managed_api
+}
+
 trap cleanup EXIT
+
+stop_managed_api
+if curl -sS -o /dev/null -w "%{http_code}" "http://127.0.0.1:9999/ready" | grep -qE '^2[0-9][0-9]$'; then
+  echo "Erro: ja existe uma API respondendo em http://127.0.0.1:9999"
+  echo "Dica: encerre a API em execucao antes de rodar o teste para evitar falso positivo."
+  exit 1
+fi
 
 echo "[1/6] Build do conversor de referencias"
 make -C "$API_DIR" preprocess_references
@@ -70,10 +82,7 @@ fi
 
 echo "[4/6] Subindo API local"
 : > "$LOG_FILE"
-(
-  cd "$API_DIR"
-  DATA_DIR="$DATA_DIR" ./fraud_api >"$LOG_FILE" 2>&1
-) &
+DATA_DIR="$DATA_DIR" "$API_DIR/fraud_api" >"$LOG_FILE" 2>&1 &
 API_PID=$!
 echo "$API_PID" > "$PID_FILE"
 

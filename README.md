@@ -159,6 +159,12 @@ Topologia:
 
 Comandos uteis:
 
+- Build da imagem manual (a partir de api):
+  cd api && docker build -t ghcr.io/diogothomaz/rinhabackend2026 .
+
+- Push para GHCR:
+  docker push ghcr.io/diogothomaz/rinhabackend2026
+
 - Subir stack completa:
   docker compose up -d --build
 
