@@ -1,0 +1,70 @@
+services:
+  data-prep:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    entrypoint: ["/app/docker-prepare-data.sh"]
+    environment:
+      DATA_DIR: /data
+      RESOURCES_DIR: /resources
+      USE_FULL_DATASET: "0"
+    volumes:
+      - rinha_data:/data
+      - ./resources:/resources:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "0.10"
+          memory: "32MB"
+
+  api1:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    depends_on:
+      data-prep:
+        condition: service_completed_successfully
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - rinha_data:/data:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "0.40"
+          memory: "143MB"
+
+  api2:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    depends_on:
+      data-prep:
+        condition: service_completed_successfully
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - rinha_data:/data:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "0.40"
+          memory: "143MB"
+
+  lb:
+    image: nginx:1.27-alpine
+    depends_on:
+      - api1
+      - api2
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "0.10"
+          memory: "32MB"
+
+volumes:
+  rinha_data:
