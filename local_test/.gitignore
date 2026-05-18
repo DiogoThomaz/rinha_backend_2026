@@ -1,0 +1,5 @@
+work/
+*.log
+*.pid
+benchmark_times*.txt
+benchmark_output*.txt
