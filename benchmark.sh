@@ -3,7 +3,7 @@ set -euo pipefail
 export LC_ALL=C
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORK_DIR="${WORK_DIR:-/tmp/rinha_backend_2026_local}"
+WORK_DIR="${WORK_DIR:-$ROOT_DIR/local_test/work}"
 
 URL_BASE="${URL_BASE:-http://127.0.0.1:9999}"
 URL="$URL_BASE/fraud-score"
