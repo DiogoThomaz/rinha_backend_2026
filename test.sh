@@ -5,7 +5,7 @@ export LC_ALL=C
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 API_DIR="$ROOT_DIR/api"
 RES_DIR="$ROOT_DIR/resources"
-WORK_DIR="${WORK_DIR:-/tmp/rinha_backend_2026_local}"
+WORK_DIR="${WORK_DIR:-$ROOT_DIR/local_test/work}"
 DATA_DIR="$WORK_DIR/data"
 LOG_FILE="$WORK_DIR/api.log"
 PID_FILE="$WORK_DIR/api.pid"
@@ -192,7 +192,7 @@ if [[ "$BENCHMARK" == "1" ]]; then
 fi
 
 echo
-echo "Teste local concluido com sucesso."
+echo "Teste local concluído com sucesso."
 echo "Logs da API: $LOG_FILE"
 echo "Dados usados: $DATA_DIR"
 if [[ "$USE_FULL_DATASET" == "1" ]]; then
